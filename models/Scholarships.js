@@ -3,13 +3,12 @@ import mongoose from "mongoose";
 const scholarshipSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
+    organization: { type: String }, // Add this field
     eligibility: { type: String, required: true },
     description: { type: String, required: true },
-    deadline: { type: String, required: true },
-    amount: { type: String }, // ✅ Optional
-    duration: { type: String }, // ✅ New
     link: { type: String, required: true },
-    image: { type: String }, // ✅ New
+    image: { type: String }, // optional
+    // Remove deadline, amount, duration if not used
   },
   { timestamps: true }
 );
