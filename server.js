@@ -17,12 +17,14 @@ const app = express();
 app.use(express.json());
 
 // Secure CORS for production
-const allowedOrigins = ["https://internship-hub-frontend-two.vercel.app/"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://internship-hub-frontend-two.vercel.app",
+];
 
 app.use(
   cors({
     origin(origin, callback) {
-      // Allow non-web tool requests (like Postman or curl)
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
