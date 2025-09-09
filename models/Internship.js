@@ -1,4 +1,3 @@
-// backend/models/Internship.js
 import mongoose from "mongoose";
 
 const internshipSchema = new mongoose.Schema(
@@ -9,6 +8,7 @@ const internshipSchema = new mongoose.Schema(
     stipend: { type: String, required: true },
     description: { type: String, required: true },
     duration: { type: String, required: true },
+    image: { type: String }, // ✅ New
     applicants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
