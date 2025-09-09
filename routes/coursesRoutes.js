@@ -1,28 +1,18 @@
-// backend/routes/courseRoutes.js
 import express from "express";
-import Course from "../models/Courses.js";
+import {
+  getAllCourses,
+  getCourseById,
+  createCourse,
+  updateCourse,
+  deleteCourse,
+} from "../controllers/courseController.js";
 
 const router = express.Router();
 
-// Get all courses
-router.get("/", async (req, res) => {
-  try {
-    const courses = await Course.find();
-    res.json(courses);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Add new course
-router.post("/", async (req, res) => {
-  try {
-    const newCourse = new Course(req.body);
-    await newCourse.save();
-    res.status(201).json(newCourse);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+router.get("/", getAllCourses);
+router.get("/:id", getCourseById);
+router.post("/", createCourse);
+router.put("/:id", updateCourse);
+router.delete("/:id", deleteCourse);
 
 export default router;
