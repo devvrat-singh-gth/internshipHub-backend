@@ -24,10 +24,10 @@ export const getScholarshipById = async (req, res) => {
 
 // @desc Add a new scholarship
 export const createScholarship = async (req, res) => {
-  const { title, eligibility, description, deadline, link } = req.body;
+  // After
+  const { title, eligibility, description, link } = req.body;
 
-  // Validate required fields
-  if (!title || !eligibility || !description || !deadline || !link) {
+  if (!title || !eligibility || !description || !link) {
     return res.status(400).json({ error: "Missing required fields." });
   }
 
