@@ -8,8 +8,16 @@ const internshipSchema = new mongoose.Schema(
     stipend: { type: String, required: true },
     description: { type: String, required: true },
     duration: { type: String, required: true },
-    image: { type: String }, // ✅ New
+    image: { type: String },
+
     applicants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+
+    // 🔑 Admin who created it
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true }
 );

@@ -5,9 +5,16 @@ const courseSchema = new mongoose.Schema(
     title: { type: String, required: true },
     provider: { type: String, required: true },
     description: { type: String, required: true },
-    duration: { type: String }, // ✅ optional
+    duration: { type: String },
     link: { type: String, required: true },
-    image: { type: String }, // ✅ New field
+    image: { type: String },
+
+    // 🔑 Admin who created it
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true }
 );

@@ -5,6 +5,7 @@ import {
   createScholarship,
   updateScholarship,
   deleteScholarship,
+  saveScholarship,
 } from "../controllers/scholarshipController.js";
 
 const router = express.Router();
@@ -12,6 +13,7 @@ const router = express.Router();
 router.get("/", getAllScholarships);
 router.get("/:id", getScholarshipById);
 router.post("/", createScholarship);
+router.post("/:id/save", saveScholarship);
 router.put("/:id", updateScholarship);
 router.delete("/:id", deleteScholarship);
 
