@@ -1,5 +1,4 @@
 // backend/server.js
-
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
@@ -10,6 +9,7 @@ import internshipRoutes from "./routes/internshipRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import courseRoutes from "./routes/coursesRoutes.js";
 import scholarshipRoutes from "./routes/scholarshipsRoutes.js";
+
 dotenv.config();
 const app = express();
 
@@ -41,6 +41,7 @@ app.use("/api/internships", internshipRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/scholarships", scholarshipRoutes);
+
 // Health check
 app.get("/", (req, res) => res.send("✅ API is running..."));
 
