@@ -1,37 +1,31 @@
 import Course from "../models/Courses.js";
 import User from "../models/User.js";
 
-// Get all courses
-export const getAllCourses = async (req, res) => {
+// Public: get all courses
+export const getAllCoursesPublic = async (req, res) => {
   try {
-    let courses;
-
-    if (req.user?.type === "admin") {
-      // Admin: only see their own
-      courses = await Course.find({ createdBy: req.user.id });
-    } else {
-      // Students/public: see all
-      courses = await Course.find();
-    }
-
+    const courses = await Course.find().sort({ createdAt: -1 });
     res.json(courses);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Get course by ID
+// Admin: get only own courses
+export const getAllCoursesAdmin = async (req, res) => {
+  try {
+    const courses = await Course.find({ createdBy: req.user.id });
+    res.json(courses);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get single course (anyone can view)
 export const getCourseById = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ error: "Course not found" });
-
-    if (
-      req.user?.type === "admin" &&
-      course.createdBy.toString() !== req.user.id
-    ) {
-      return res.status(403).json({ error: "Not authorized" });
-    }
 
     res.json(course);
   } catch (err) {
@@ -39,7 +33,7 @@ export const getCourseById = async (req, res) => {
   }
 };
 
-// Add a new course
+// Create course (admin only)
 export const createCourse = async (req, res) => {
   try {
     const newCourse = new Course({
@@ -72,7 +66,7 @@ export const saveCourse = async (req, res) => {
   }
 };
 
-// Update a course
+// Update course (admin only)
 export const updateCourse = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
@@ -90,7 +84,7 @@ export const updateCourse = async (req, res) => {
   }
 };
 
-// Delete a course
+// Delete course (admin only)
 export const deleteCourse = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);

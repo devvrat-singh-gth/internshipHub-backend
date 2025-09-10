@@ -1,6 +1,7 @@
 import express from "express";
 import {
-  getAllScholarships,
+  getAllScholarshipsPublic,
+  getAllScholarshipsAdmin,
   getScholarshipById,
   createScholarship,
   updateScholarship,
@@ -11,9 +12,12 @@ import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// Public
+router.get("/public", getAllScholarshipsPublic);
+router.get("/:id", getScholarshipById);
+
 // Admin only
-router.get("/", protect, adminOnly, getAllScholarships);
-router.get("/:id", protect, adminOnly, getScholarshipById);
+router.get("/admin/list", protect, adminOnly, getAllScholarshipsAdmin);
 router.post("/", protect, adminOnly, createScholarship);
 router.put("/:id", protect, adminOnly, updateScholarship);
 router.delete("/:id", protect, adminOnly, deleteScholarship);

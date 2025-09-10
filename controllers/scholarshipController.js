@@ -1,44 +1,39 @@
 import Scholarship from "../models/Scholarships.js";
 import User from "../models/User.js";
 
-// Get all scholarships
-export const getAllScholarships = async (req, res) => {
+// Public: get all scholarships
+export const getAllScholarshipsPublic = async (req, res) => {
   try {
-    let scholarships;
-
-    if (req.user?.type === "admin") {
-      scholarships = await Scholarship.find({ createdBy: req.user.id });
-    } else {
-      scholarships = await Scholarship.find();
-    }
-
+    const scholarships = await Scholarship.find().sort({ createdAt: -1 });
     res.json(scholarships);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Get scholarship by ID
+// Admin: get only own
+export const getAllScholarshipsAdmin = async (req, res) => {
+  try {
+    const scholarships = await Scholarship.find({ createdBy: req.user.id });
+    res.json(scholarships);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get scholarship by ID (anyone)
 export const getScholarshipById = async (req, res) => {
   try {
     const scholarship = await Scholarship.findById(req.params.id);
     if (!scholarship)
       return res.status(404).json({ error: "Scholarship not found" });
-
-    if (
-      req.user?.type === "admin" &&
-      scholarship.createdBy.toString() !== req.user.id
-    ) {
-      return res.status(403).json({ error: "Not authorized" });
-    }
-
     res.json(scholarship);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Create scholarship
+// Create scholarship (admin only)
 export const createScholarship = async (req, res) => {
   try {
     const newScholarship = new Scholarship({
@@ -52,20 +47,17 @@ export const createScholarship = async (req, res) => {
   }
 };
 
-// Save scholarship for user
+// Save scholarship (user)
 export const saveScholarship = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const scholarshipId = req.params.id;
-
-    const user = await User.findById(userId);
+    const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (user.savedScholarships.includes(scholarshipId)) {
+    if (user.savedScholarships.includes(req.params.id)) {
       return res.status(400).json({ message: "Already saved" });
     }
 
-    user.savedScholarships.push(scholarshipId);
+    user.savedScholarships.push(req.params.id);
     await user.save();
 
     res.json({ message: "Scholarship saved" });
@@ -74,7 +66,7 @@ export const saveScholarship = async (req, res) => {
   }
 };
 
-// Update scholarship
+// Update (admin only)
 export const updateScholarship = async (req, res) => {
   try {
     const scholarship = await Scholarship.findById(req.params.id);
@@ -95,7 +87,7 @@ export const updateScholarship = async (req, res) => {
   }
 };
 
-// Delete scholarship
+// Delete (admin only)
 export const deleteScholarship = async (req, res) => {
   try {
     const scholarship = await Scholarship.findById(req.params.id);

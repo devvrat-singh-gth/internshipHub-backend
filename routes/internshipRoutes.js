@@ -14,7 +14,7 @@ import { protect, adminOnly } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 // Public
-router.get("/", getInternships);
+router.get("/public", getInternships);
 router.get("/:id", getInternshipById);
 
 // User (logged-in)

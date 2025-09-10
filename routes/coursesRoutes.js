@@ -1,6 +1,7 @@
 import express from "express";
 import {
-  getAllCourses,
+  getAllCoursesPublic,
+  getAllCoursesAdmin,
   getCourseById,
   createCourse,
   saveCourse,
@@ -11,9 +12,12 @@ import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// Public
+router.get("/public", getAllCoursesPublic);
+router.get("/:id", getCourseById);
+
 // Admin only
-router.get("/", protect, adminOnly, getAllCourses);
-router.get("/:id", protect, adminOnly, getCourseById);
+router.get("/admin/list", protect, adminOnly, getAllCoursesAdmin);
 router.post("/", protect, adminOnly, createCourse);
 router.put("/:id", protect, adminOnly, updateCourse);
 router.delete("/:id", protect, adminOnly, deleteCourse);
