@@ -1,10 +1,17 @@
 import Scholarship from "../models/Scholarships.js";
 import User from "../models/User.js";
 
-// Get all scholarships (only logged-in admin’s own)
+// Get all scholarships
 export const getAllScholarships = async (req, res) => {
   try {
-    const scholarships = await Scholarship.find({ createdBy: req.user.id });
+    let scholarships;
+
+    if (req.user?.type === "admin") {
+      scholarships = await Scholarship.find({ createdBy: req.user.id });
+    } else {
+      scholarships = await Scholarship.find();
+    }
+
     res.json(scholarships);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -18,8 +25,12 @@ export const getScholarshipById = async (req, res) => {
     if (!scholarship)
       return res.status(404).json({ error: "Scholarship not found" });
 
-    if (scholarship.createdBy.toString() !== req.user.id)
+    if (
+      req.user?.type === "admin" &&
+      scholarship.createdBy.toString() !== req.user.id
+    ) {
       return res.status(403).json({ error: "Not authorized" });
+    }
 
     res.json(scholarship);
   } catch (err) {

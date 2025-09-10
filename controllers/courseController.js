@@ -1,10 +1,19 @@
 import Course from "../models/Courses.js";
 import User from "../models/User.js";
 
-// Get all courses (only by logged-in admin)
+// Get all courses
 export const getAllCourses = async (req, res) => {
   try {
-    const courses = await Course.find({ createdBy: req.user.id });
+    let courses;
+
+    if (req.user?.type === "admin") {
+      // Admin: only see their own
+      courses = await Course.find({ createdBy: req.user.id });
+    } else {
+      // Students/public: see all
+      courses = await Course.find();
+    }
+
     res.json(courses);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -17,8 +26,12 @@ export const getCourseById = async (req, res) => {
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ error: "Course not found" });
 
-    if (course.createdBy.toString() !== req.user.id)
+    if (
+      req.user?.type === "admin" &&
+      course.createdBy.toString() !== req.user.id
+    ) {
       return res.status(403).json({ error: "Not authorized" });
+    }
 
     res.json(course);
   } catch (err) {
@@ -31,7 +44,7 @@ export const createCourse = async (req, res) => {
   try {
     const newCourse = new Course({
       ...req.body,
-      createdBy: req.user.id, // ✅
+      createdBy: req.user.id,
     });
     await newCourse.save();
     res.status(201).json(newCourse);
@@ -43,17 +56,14 @@ export const createCourse = async (req, res) => {
 // Save course for student
 export const saveCourse = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const courseId = req.params.id;
-
-    const user = await User.findById(userId);
+    const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (user.savedCourses.includes(courseId)) {
+    if (user.savedCourses.includes(req.params.id)) {
       return res.status(400).json({ message: "Already saved" });
     }
 
-    user.savedCourses.push(courseId);
+    user.savedCourses.push(req.params.id);
     await user.save();
 
     res.json({ message: "Course saved" });

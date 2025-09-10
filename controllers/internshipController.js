@@ -4,21 +4,31 @@ import User from "../models/User.js";
 // Get all internships (only by logged-in admin)
 export const getInternships = async (req, res) => {
   try {
-    const internships = await Internship.find({ createdBy: req.user.id });
+    let internships;
+
+    if (req.user?.type === "admin") {
+      internships = await Internship.find({ createdBy: req.user.id });
+    } else {
+      internships = await Internship.find();
+    }
+
     res.json(internships);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-
 // Get single internship
 export const getInternshipById = async (req, res) => {
   try {
     const internship = await Internship.findById(req.params.id);
     if (!internship) return res.status(404).json({ message: "Not found" });
 
-    if (internship.createdBy.toString() !== req.user.id)
+    if (
+      req.user?.type === "admin" &&
+      internship.createdBy.toString() !== req.user.id
+    ) {
       return res.status(403).json({ message: "Not authorized" });
+    }
 
     res.json(internship);
   } catch (err) {
