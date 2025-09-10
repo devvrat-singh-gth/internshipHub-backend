@@ -9,16 +9,16 @@ import {
   saveInternship,
   recommendInternships,
 } from "../controllers/internshipController.js";
-import { protect, adminOnly } from "../middleware/authMiddleware.js"; // ✅ this works now
+import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 // Public
 router.get("/", getInternships);
-router.get("/recommendations", protect, recommendInternships); // order fixed
 router.get("/:id", getInternshipById);
 
 // User (logged-in)
+router.get("/recommendations", protect, recommendInternships);
 router.post("/:id/apply", protect, applyInternship);
 router.post("/:id/save", protect, saveInternship);
 

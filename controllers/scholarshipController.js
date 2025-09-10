@@ -1,6 +1,7 @@
 import Scholarship from "../models/Scholarships.js";
+import User from "../models/User.js";
 
-// Get all scholarships (only by logged-in admin)
+// Get all scholarships (only logged-in admin’s own)
 export const getAllScholarships = async (req, res) => {
   try {
     const scholarships = await Scholarship.find({ createdBy: req.user.id });
@@ -26,7 +27,7 @@ export const getScholarshipById = async (req, res) => {
   }
 };
 
-// Add a new scholarship
+// Create scholarship
 export const createScholarship = async (req, res) => {
   try {
     const newScholarship = new Scholarship({
@@ -36,10 +37,11 @@ export const createScholarship = async (req, res) => {
     await newScholarship.save();
     res.status(201).json(newScholarship);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(400).json({ error: err.message });
   }
 };
-// scholarshipController.js
+
+// Save scholarship for user
 export const saveScholarship = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -60,7 +62,8 @@ export const saveScholarship = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-// Update a scholarship
+
+// Update scholarship
 export const updateScholarship = async (req, res) => {
   try {
     const scholarship = await Scholarship.findById(req.params.id);
@@ -81,7 +84,7 @@ export const updateScholarship = async (req, res) => {
   }
 };
 
-// Delete a scholarship
+// Delete scholarship
 export const deleteScholarship = async (req, res) => {
   try {
     const scholarship = await Scholarship.findById(req.params.id);

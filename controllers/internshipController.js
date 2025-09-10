@@ -1,10 +1,10 @@
 import Internship from "../models/Internship.js";
 import User from "../models/User.js";
 
-// Get all internships
+// Get all internships (only by logged-in admin)
 export const getInternships = async (req, res) => {
   try {
-    const internships = await Internship.find();
+    const internships = await Internship.find({ createdBy: req.user.id });
     res.json(internships);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -16,6 +16,10 @@ export const getInternshipById = async (req, res) => {
   try {
     const internship = await Internship.findById(req.params.id);
     if (!internship) return res.status(404).json({ message: "Not found" });
+
+    if (internship.createdBy.toString() !== req.user.id)
+      return res.status(403).json({ message: "Not authorized" });
+
     res.json(internship);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -25,7 +29,10 @@ export const getInternshipById = async (req, res) => {
 // Create internship
 export const createInternship = async (req, res) => {
   try {
-    const newInternship = new Internship(req.body);
+    const newInternship = new Internship({
+      ...req.body,
+      createdBy: req.user.id, // ✅
+    });
     const saved = await newInternship.save();
     res.json(saved);
   } catch (err) {
@@ -36,10 +43,18 @@ export const createInternship = async (req, res) => {
 // Update internship
 export const updateInternship = async (req, res) => {
   try {
+    const internship = await Internship.findById(req.params.id);
+    if (!internship) return res.status(404).json({ message: "Not found" });
+
+    if (internship.createdBy.toString() !== req.user.id)
+      return res.status(403).json({ message: "Not authorized" });
+
     const updated = await Internship.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true }
+      {
+        new: true,
+      }
     );
     res.json(updated);
   } catch (err) {
@@ -50,7 +65,13 @@ export const updateInternship = async (req, res) => {
 // Delete internship
 export const deleteInternship = async (req, res) => {
   try {
-    await Internship.findByIdAndDelete(req.params.id);
+    const internship = await Internship.findById(req.params.id);
+    if (!internship) return res.status(404).json({ message: "Not found" });
+
+    if (internship.createdBy.toString() !== req.user.id)
+      return res.status(403).json({ message: "Not authorized" });
+
+    await internship.deleteOne();
     res.json({ message: "Internship removed" });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -69,7 +90,6 @@ export const applyInternship = async (req, res) => {
     if (!internship || !user)
       return res.status(404).json({ message: "Not found" });
 
-    // Prevent duplicate applications
     if (internship.applicants.includes(userId)) {
       return res.status(400).json({ message: "Already applied" });
     }
@@ -107,6 +127,8 @@ export const saveInternship = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+// ✅ Recommend internships
 export const recommendInternships = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -114,12 +136,11 @@ export const recommendInternships = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Simple matching: sector or required skills
     const query = {
       $or: [
-        { sector: user.sector }, // Match by preferred sector
-        { skills: { $in: user.skills } }, // Match if internship requires one of user skills
-        { location: user.location }, // Optional: match preferred location
+        { sector: user.sector },
+        { skills: { $in: user.skills } },
+        { location: user.location },
       ],
     };
 

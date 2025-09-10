@@ -7,14 +7,18 @@ import {
   updateCourse,
   deleteCourse,
 } from "../controllers/courseController.js";
+import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", getAllCourses);
-router.get("/:id", getCourseById);
-router.post("/", createCourse);
-router.post("/:id/save", saveCourse);
-router.put("/:id", updateCourse);
-router.delete("/:id", deleteCourse);
+// Admin only
+router.get("/", protect, adminOnly, getAllCourses);
+router.get("/:id", protect, adminOnly, getCourseById);
+router.post("/", protect, adminOnly, createCourse);
+router.put("/:id", protect, adminOnly, updateCourse);
+router.delete("/:id", protect, adminOnly, deleteCourse);
+
+// Users (logged-in) can save
+router.post("/:id/save", protect, saveCourse);
 
 export default router;

@@ -7,14 +7,18 @@ import {
   deleteScholarship,
   saveScholarship,
 } from "../controllers/scholarshipController.js";
+import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", getAllScholarships);
-router.get("/:id", getScholarshipById);
-router.post("/", createScholarship);
-router.post("/:id/save", saveScholarship);
-router.put("/:id", updateScholarship);
-router.delete("/:id", deleteScholarship);
+// Admin only
+router.get("/", protect, adminOnly, getAllScholarships);
+router.get("/:id", protect, adminOnly, getScholarshipById);
+router.post("/", protect, adminOnly, createScholarship);
+router.put("/:id", protect, adminOnly, updateScholarship);
+router.delete("/:id", protect, adminOnly, deleteScholarship);
+
+// Users (logged-in) can save
+router.post("/:id/save", protect, saveScholarship);
 
 export default router;

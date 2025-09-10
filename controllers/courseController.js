@@ -1,4 +1,5 @@
 import Course from "../models/Courses.js";
+import User from "../models/User.js";
 
 // Get all courses (only by logged-in admin)
 export const getAllCourses = async (req, res) => {
@@ -30,7 +31,7 @@ export const createCourse = async (req, res) => {
   try {
     const newCourse = new Course({
       ...req.body,
-      createdBy: req.user.id,
+      createdBy: req.user.id, // ✅
     });
     await newCourse.save();
     res.status(201).json(newCourse);
@@ -38,7 +39,8 @@ export const createCourse = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
-// courseController.js
+
+// Save course for student
 export const saveCourse = async (req, res) => {
   try {
     const userId = req.user.id;

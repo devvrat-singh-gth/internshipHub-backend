@@ -16,15 +16,14 @@ export const protect = async (req, res, next) => {
         return res.status(401).json({ message: "User not found" });
       }
 
-      next();
+      return next();
     } catch (error) {
-      res.status(401).json({ message: "Not authorized, token failed" });
+      console.error("Auth error:", error.message);
+      return res.status(401).json({ message: "Not authorized, invalid token" });
     }
   }
 
-  if (!token) {
-    res.status(401).json({ message: "Not authorized, no token" });
-  }
+  return res.status(401).json({ message: "Not authorized, no token provided" });
 };
 
 // 👑 Admin only middleware
