@@ -40,7 +40,9 @@ export const createScholarship = async (req, res) => {
 
     // Auto fallback if no image provided
     if (!image || image.trim() === "") {
-      image = `https://picsum.photos/seed/${encodeURIComponent(title)}/800/600`;
+      image = `https://picsum.photos/seed/${encodeURIComponent(
+        title
+      )}/800/600.jpg`;
     }
 
     const newScholarship = new Scholarship({
