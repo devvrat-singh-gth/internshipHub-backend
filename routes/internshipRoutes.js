@@ -2,6 +2,7 @@ import express from "express";
 import {
   createInternship,
   getInternships,
+  getAdminInternships,
   getInternshipById,
   updateInternship,
   deleteInternship,
@@ -23,6 +24,7 @@ router.post("/:id/apply", protect, applyInternship);
 router.post("/:id/save", protect, saveInternship);
 
 // Admin only
+router.get("/admin/list", protect, adminOnly, getAdminInternships);
 router.post("/", protect, adminOnly, createInternship);
 router.put("/:id", protect, adminOnly, updateInternship);
 router.delete("/:id", protect, adminOnly, deleteInternship);

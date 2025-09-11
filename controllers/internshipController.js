@@ -11,6 +11,18 @@ export const getInternships = async (req, res) => {
   }
 };
 
+// Admin: get only own internships
+export const getAdminInternships = async (req, res) => {
+  try {
+    const internships = await Internship.find({ createdBy: req.user.id }).sort({
+      createdAt: -1,
+    });
+    res.json(internships);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // Get single internship
 export const getInternshipById = async (req, res) => {
   try {
