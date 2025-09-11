@@ -25,10 +25,21 @@ export const getInternshipById = async (req, res) => {
 // Create internship (admin only)
 export const createInternship = async (req, res) => {
   try {
+    let { image, title } = req.body;
+
+    // Auto fallback if no image provided
+    if (!image || image.trim() === "") {
+      image = `https://source.unsplash.com/800x600/?${encodeURIComponent(
+        title
+      )},internship,job`;
+    }
+
     const newInternship = new Internship({
       ...req.body,
+      image,
       createdBy: req.user.id,
     });
+
     const saved = await newInternship.save();
     res.json(saved);
   } catch (err) {

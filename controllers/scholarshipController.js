@@ -36,10 +36,21 @@ export const getScholarshipById = async (req, res) => {
 // Create scholarship (admin only)
 export const createScholarship = async (req, res) => {
   try {
+    let { image, title } = req.body;
+
+    // Auto fallback if no image provided
+    if (!image || image.trim() === "") {
+      image = `https://source.unsplash.com/800x600/?${encodeURIComponent(
+        title
+      )},scholarship,education`;
+    }
+
     const newScholarship = new Scholarship({
       ...req.body,
+      image,
       createdBy: req.user.id,
     });
+
     await newScholarship.save();
     res.status(201).json(newScholarship);
   } catch (err) {

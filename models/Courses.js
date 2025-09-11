@@ -7,9 +7,10 @@ const courseSchema = new mongoose.Schema(
     description: { type: String, required: true },
     duration: { type: String },
     link: { type: String, required: true },
-    image: { type: String },
-
-    // 🔑 Admin who created it
+    image: {
+      type: String,
+      default: "https://source.unsplash.com/800x600/?online,course,education",
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

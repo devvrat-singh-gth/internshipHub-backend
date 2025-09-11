@@ -36,10 +36,21 @@ export const getCourseById = async (req, res) => {
 // Create course (admin only)
 export const createCourse = async (req, res) => {
   try {
+    let { image, title } = req.body;
+
+    // Auto fallback if no image provided
+    if (!image || image.trim() === "") {
+      image = `https://source.unsplash.com/800x600/?${encodeURIComponent(
+        title
+      )},online,course`;
+    }
+
     const newCourse = new Course({
       ...req.body,
+      image,
       createdBy: req.user.id,
     });
+
     await newCourse.save();
     res.status(201).json(newCourse);
   } catch (err) {
