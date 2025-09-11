@@ -38,11 +38,10 @@ export const createScholarship = async (req, res) => {
   try {
     let { image, title } = req.body;
 
-    // Auto fallback if no image provided
     if (!image || image.trim() === "") {
-      image = `https://picsum.photos/seed/${encodeURIComponent(
-        title
-      )}/800/600.jpg`;
+      image = `https://source.unsplash.com/800x600/?${encodeURIComponent(
+        title || "scholarship"
+      )},education`;
     }
 
     const newScholarship = new Scholarship({
