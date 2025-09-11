@@ -1,5 +1,6 @@
 import Course from "../models/Courses.js";
 import User from "../models/User.js";
+import { getRandomImage } from "../utils/getRandomImage.js";
 
 // Public: get all courses
 export const getAllCoursesPublic = async (req, res) => {
@@ -21,28 +22,24 @@ export const getAllCoursesAdmin = async (req, res) => {
   }
 };
 
-// Get single course (anyone can view)
+// Get single course
 export const getCourseById = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ error: "Course not found" });
-
     res.json(course);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Create course (admin only)
+// Create course
 export const createCourse = async (req, res) => {
   try {
     let { image, title } = req.body;
 
-    // Auto fallback if no image provided
     if (!image || image.trim() === "") {
-      image = `https://source.unsplash.com/800x600/?${encodeURIComponent(
-        title || "course"
-      )},education`;
+      image = getRandomImage(title, "course");
     }
 
     const newCourse = new Course({
@@ -58,7 +55,7 @@ export const createCourse = async (req, res) => {
   }
 };
 
-// Save course for student
+// Save course
 export const saveCourse = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -77,14 +74,15 @@ export const saveCourse = async (req, res) => {
   }
 };
 
-// Update course (admin only)
+// Update course
 export const updateCourse = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ error: "Course not found" });
 
-    if (course.createdBy.toString() !== req.user.id)
+    if (course.createdBy.toString() !== req.user.id) {
       return res.status(403).json({ error: "Not authorized" });
+    }
 
     const updated = await Course.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -95,14 +93,15 @@ export const updateCourse = async (req, res) => {
   }
 };
 
-// Delete course (admin only)
+// Delete course
 export const deleteCourse = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ error: "Course not found" });
 
-    if (course.createdBy.toString() !== req.user.id)
+    if (course.createdBy.toString() !== req.user.id) {
       return res.status(403).json({ error: "Not authorized" });
+    }
 
     await course.deleteOne();
     res.json({ message: "Course deleted successfully" });

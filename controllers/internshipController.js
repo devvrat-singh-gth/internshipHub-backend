@@ -1,5 +1,6 @@
 import Internship from "../models/Internship.js";
 import User from "../models/User.js";
+import { getRandomImage } from "../utils/getRandomImage.js";
 
 // Public: get all internships
 export const getInternships = async (req, res) => {
@@ -11,7 +12,7 @@ export const getInternships = async (req, res) => {
   }
 };
 
-// Admin: get only own internships
+// Admin: get only own
 export const getAdminInternships = async (req, res) => {
   try {
     const internships = await Internship.find({ createdBy: req.user.id }).sort({
@@ -34,15 +35,13 @@ export const getInternshipById = async (req, res) => {
   }
 };
 
-// Create internship (admin only)
+// Create internship
 export const createInternship = async (req, res) => {
   try {
     let { image, title } = req.body;
 
     if (!image || image.trim() === "") {
-      image = `https://source.unsplash.com/800x600/?${encodeURIComponent(
-        title || "internship"
-      )},career`;
+      image = getRandomImage(title, "internship");
     }
 
     const newInternship = new Internship({
@@ -58,14 +57,15 @@ export const createInternship = async (req, res) => {
   }
 };
 
-// Update internship (admin only)
+// Update internship
 export const updateInternship = async (req, res) => {
   try {
     const internship = await Internship.findById(req.params.id);
     if (!internship) return res.status(404).json({ message: "Not found" });
 
-    if (internship.createdBy.toString() !== req.user.id)
+    if (internship.createdBy.toString() !== req.user.id) {
       return res.status(403).json({ message: "Not authorized" });
+    }
 
     const updated = await Internship.findByIdAndUpdate(
       req.params.id,
@@ -78,14 +78,15 @@ export const updateInternship = async (req, res) => {
   }
 };
 
-// Delete internship (admin only)
+// Delete internship
 export const deleteInternship = async (req, res) => {
   try {
     const internship = await Internship.findById(req.params.id);
     if (!internship) return res.status(404).json({ message: "Not found" });
 
-    if (internship.createdBy.toString() !== req.user.id)
+    if (internship.createdBy.toString() !== req.user.id) {
       return res.status(403).json({ message: "Not authorized" });
+    }
 
     await internship.deleteOne();
     res.json({ message: "Internship removed" });
@@ -94,7 +95,7 @@ export const deleteInternship = async (req, res) => {
   }
 };
 
-// Apply
+// Apply internship
 export const applyInternship = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -103,8 +104,9 @@ export const applyInternship = async (req, res) => {
     const internship = await Internship.findById(internshipId);
     const user = await User.findById(userId);
 
-    if (!internship || !user)
+    if (!internship || !user) {
       return res.status(404).json({ message: "Not found" });
+    }
 
     if (internship.applicants.includes(userId)) {
       return res.status(400).json({ message: "Already applied" });
@@ -145,7 +147,6 @@ export const saveInternship = async (req, res) => {
 export const recommendInternships = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const query = {

@@ -1,5 +1,6 @@
 import Scholarship from "../models/Scholarships.js";
 import User from "../models/User.js";
+import { getRandomImage } from "../utils/getRandomImage.js";
 
 // Public: get all scholarships
 export const getAllScholarshipsPublic = async (req, res) => {
@@ -21,7 +22,7 @@ export const getAllScholarshipsAdmin = async (req, res) => {
   }
 };
 
-// Get scholarship by ID (anyone)
+// Get scholarship by ID
 export const getScholarshipById = async (req, res) => {
   try {
     const scholarship = await Scholarship.findById(req.params.id);
@@ -33,15 +34,13 @@ export const getScholarshipById = async (req, res) => {
   }
 };
 
-// Create scholarship (admin only)
+// Create scholarship
 export const createScholarship = async (req, res) => {
   try {
     let { image, title } = req.body;
 
     if (!image || image.trim() === "") {
-      image = `https://source.unsplash.com/800x600/?${encodeURIComponent(
-        title || "scholarship"
-      )},education`;
+      image = getRandomImage(title, "scholarship");
     }
 
     const newScholarship = new Scholarship({
@@ -57,7 +56,7 @@ export const createScholarship = async (req, res) => {
   }
 };
 
-// Save scholarship (user)
+// Save scholarship
 export const saveScholarship = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -76,15 +75,16 @@ export const saveScholarship = async (req, res) => {
   }
 };
 
-// Update (admin only)
+// Update scholarship
 export const updateScholarship = async (req, res) => {
   try {
     const scholarship = await Scholarship.findById(req.params.id);
     if (!scholarship)
       return res.status(404).json({ error: "Scholarship not found" });
 
-    if (scholarship.createdBy.toString() !== req.user.id)
+    if (scholarship.createdBy.toString() !== req.user.id) {
       return res.status(403).json({ error: "Not authorized" });
+    }
 
     const updated = await Scholarship.findByIdAndUpdate(
       req.params.id,
@@ -97,15 +97,16 @@ export const updateScholarship = async (req, res) => {
   }
 };
 
-// Delete (admin only)
+// Delete scholarship
 export const deleteScholarship = async (req, res) => {
   try {
     const scholarship = await Scholarship.findById(req.params.id);
     if (!scholarship)
       return res.status(404).json({ error: "Scholarship not found" });
 
-    if (scholarship.createdBy.toString() !== req.user.id)
+    if (scholarship.createdBy.toString() !== req.user.id) {
       return res.status(403).json({ error: "Not authorized" });
+    }
 
     await scholarship.deleteOne();
     res.json({ message: "Scholarship deleted successfully" });
