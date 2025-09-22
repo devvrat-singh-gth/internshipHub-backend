@@ -36,17 +36,25 @@ export const getInternshipById = async (req, res) => {
   }
 };
 
-// Create internship
+// ✅ Create internship
 export const createInternship = async (req, res) => {
   try {
-    let { image, title } = req.body;
+    let { image, title, sector, skills } = req.body;
 
     if (!image || image.trim() === "") {
       image = getRandomImage(title, "internship");
     }
 
+    const skillsArray = Array.isArray(skills)
+      ? skills
+      : typeof skills === "string"
+      ? [skills]
+      : [];
+
     const newInternship = new Internship({
       ...req.body,
+      sector,
+      skills: skillsArray,
       image,
       createdBy: req.user.id,
     });
@@ -58,7 +66,7 @@ export const createInternship = async (req, res) => {
   }
 };
 
-// Update internship
+// ✅ Update internship
 export const updateInternship = async (req, res) => {
   try {
     const internship = await Internship.findById(req.params.id);
@@ -68,31 +76,22 @@ export const updateInternship = async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
+    const { skills, ...rest } = req.body;
+    const skillsArray = Array.isArray(skills)
+      ? skills
+      : typeof skills === "string"
+      ? [skills]
+      : [];
+
     const updated = await Internship.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      { ...rest, skills: skillsArray },
       { new: true }
     );
+
     res.json(updated);
   } catch (err) {
     res.status(400).json({ message: err.message });
-  }
-};
-
-// Delete internship
-export const deleteInternship = async (req, res) => {
-  try {
-    const internship = await Internship.findById(req.params.id);
-    if (!internship) return res.status(404).json({ message: "Not found" });
-
-    if (internship.createdBy.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Not authorized" });
-    }
-
-    await internship.deleteOne();
-    res.json({ message: "Internship removed" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
   }
 };
 
@@ -150,9 +149,7 @@ export const recommendInternships = async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Fetch all internships
     const internships = await Internship.find();
-
     if (internships.length === 0) {
       return res.json([]);
     }

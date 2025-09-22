@@ -16,7 +16,6 @@ const router = express.Router();
 
 // Public
 router.get("/public", getInternships);
-router.get("/:id", getInternshipById);
 
 // User (logged-in)
 router.get("/recommendations", protect, recommendInternships);
@@ -28,5 +27,8 @@ router.get("/admin/list", protect, adminOnly, getAdminInternships);
 router.post("/", protect, adminOnly, createInternship);
 router.put("/:id", protect, adminOnly, updateInternship);
 router.delete("/:id", protect, adminOnly, deleteInternship);
+
+// Single internship (⚠️ must be last, otherwise it catches `/recommendations`)
+router.get("/:id", getInternshipById);
 
 export default router;

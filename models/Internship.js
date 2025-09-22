@@ -12,6 +12,11 @@ const internshipSchema = new mongoose.Schema(
       type: String,
       default: "https://source.unsplash.com/800x600/?internship,job,career",
     },
+
+    // 🆕 Added fields for AI matching
+    sector: { type: String }, // e.g. IT, Finance, Marketing
+    skills: [String], // e.g. ["React", "Python"]
+
     applicants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
