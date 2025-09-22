@@ -45,16 +45,10 @@ export const createInternship = async (req, res) => {
       image = getRandomImage(title, "internship");
     }
 
-    const skillsArray = Array.isArray(skills)
-      ? skills
-      : typeof skills === "string"
-      ? [skills]
-      : [];
-
     const newInternship = new Internship({
       ...req.body,
       sector,
-      skills: skillsArray,
+      skills: Array.isArray(skills) ? skills : [],
       image,
       createdBy: req.user.id,
     });
@@ -76,22 +70,38 @@ export const updateInternship = async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    const { skills, ...rest } = req.body;
-    const skillsArray = Array.isArray(skills)
-      ? skills
-      : typeof skills === "string"
-      ? [skills]
-      : [];
+    const { sector, skills } = req.body;
 
     const updated = await Internship.findByIdAndUpdate(
       req.params.id,
-      { ...rest, skills: skillsArray },
+      {
+        ...req.body,
+        sector,
+        skills: Array.isArray(skills) ? skills : [],
+      },
       { new: true }
     );
 
     res.json(updated);
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+};
+
+// ✅ Delete internship
+export const deleteInternship = async (req, res) => {
+  try {
+    const internship = await Internship.findById(req.params.id);
+    if (!internship) return res.status(404).json({ message: "Not found" });
+
+    if (internship.createdBy.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    await internship.deleteOne();
+    res.json({ message: "Internship removed" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -154,12 +164,10 @@ export const recommendInternships = async (req, res) => {
       return res.json([]);
     }
 
-    // Create user profile text
     const userProfile = `${user.education || ""} ${user.skills.join(" ")} ${
       user.sector || ""
     } ${user.location || ""}`;
 
-    // TF-IDF setup
     const TfIdf = natural.TfIdf;
     const tfidf = new TfIdf();
 
@@ -171,16 +179,12 @@ export const recommendInternships = async (req, res) => {
       );
     });
 
-    // Score internships
     const scores = [];
     tfidf.tfidfs(userProfile, (i, measure) => {
       scores.push({ internship: internships[i], score: measure });
     });
 
-    // Sort by relevance
     scores.sort((a, b) => b.score - a.score);
-
-    // Return top 5
     const topRecommendations = scores.slice(0, 5).map((s) => s.internship);
 
     res.json(topRecommendations);

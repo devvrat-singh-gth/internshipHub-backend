@@ -28,7 +28,7 @@ router.post("/", protect, adminOnly, createInternship);
 router.put("/:id", protect, adminOnly, updateInternship);
 router.delete("/:id", protect, adminOnly, deleteInternship);
 
-// Single internship (⚠️ must be last, otherwise it catches `/recommendations`)
+// ⚠️ Single internship (must be last)
 router.get("/:id", getInternshipById);
 
 export default router;
