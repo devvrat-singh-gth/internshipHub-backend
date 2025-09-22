@@ -1,6 +1,7 @@
 import Internship from "../models/Internship.js";
 import User from "../models/User.js";
 import { getRandomImage } from "../utils/getRandomImage.js";
+import natural from "natural";
 
 // Public: get all internships
 export const getInternships = async (req, res) => {
@@ -143,22 +144,49 @@ export const saveInternship = async (req, res) => {
   }
 };
 
-// Recommend internships
+// ✅ AI-lite Recommendation System
 export const recommendInternships = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const query = {
-      $or: [
-        { sector: user.sector },
-        { skills: { $in: user.skills } },
-        { location: user.location },
-      ],
-    };
+    // Fetch all internships
+    const internships = await Internship.find();
 
-    const recommendations = await Internship.find(query).limit(10);
-    res.json(recommendations);
+    if (internships.length === 0) {
+      return res.json([]);
+    }
+
+    // Create user profile text
+    const userProfile = `${user.education || ""} ${user.skills.join(" ")} ${
+      user.sector || ""
+    } ${user.location || ""}`;
+
+    // TF-IDF setup
+    const TfIdf = natural.TfIdf;
+    const tfidf = new TfIdf();
+
+    internships.forEach((intn, i) => {
+      tfidf.addDocument(
+        `${intn.title} ${intn.description} ${intn.sector || ""} ${
+          intn.location || ""
+        }`
+      );
+    });
+
+    // Score internships
+    const scores = [];
+    tfidf.tfidfs(userProfile, (i, measure) => {
+      scores.push({ internship: internships[i], score: measure });
+    });
+
+    // Sort by relevance
+    scores.sort((a, b) => b.score - a.score);
+
+    // Return top 5
+    const topRecommendations = scores.slice(0, 5).map((s) => s.internship);
+
+    res.json(topRecommendations);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
