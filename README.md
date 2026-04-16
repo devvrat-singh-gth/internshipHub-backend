@@ -22,7 +22,7 @@ Built using Node.js, Express, and MongoDB.
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com
+   git clone https://github.com/devvrat-singh-gth/internshipHub-backend
    cd internshipHub-backend
 2. **Install dependencies**
    ```bash
