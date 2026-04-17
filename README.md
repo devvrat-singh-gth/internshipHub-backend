@@ -4,6 +4,8 @@
 This is the backend for InternAdda, a platform for managing internships, applications, and recommendations.
 Built using Node.js, Express, and MongoDB.
 
+---
+
 ## Features
 - Authentication (JWT-based)
 - Role-based access (Admin/User)
