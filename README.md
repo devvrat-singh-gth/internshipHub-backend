@@ -18,6 +18,8 @@ Built using Node.js, Express, and MongoDB.
 - JWT Authentication
 - Natural (for recommendations)
 
+---
+
 ## Main Routes
 
 ### Public
